@@ -77,10 +77,13 @@ final class EventSubscriber implements EventSubscriberInterface
             $event->getController(),
         );
 
-        $this->spans[$requestId] = $this->elasticApmTracer->startSpan(
-            $name,
-            'controller',
-        );
+        try {
+            $this->spans[$requestId] = $this->elasticApmTracer->startSpan(
+                $name,
+                'controller',
+            );
+        } catch (Throwable) {
+        }
     }
 
     public function onKernelResponse(ResponseEvent $event): void

@@ -12,6 +12,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
+use Throwable;
 use ZoiloMora\ElasticAPM\ElasticApmTracer;
 use ZoiloMora\ElasticAPM\Events\Common\Context;
 
@@ -209,7 +210,10 @@ final class EventSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $this->elasticApmTracer->flush();
+        try {
+            $this->elasticApmTracer->flush();
+        } catch (Throwable) {
+        }
     }
 
     private function isActive(KernelEvent $event): bool

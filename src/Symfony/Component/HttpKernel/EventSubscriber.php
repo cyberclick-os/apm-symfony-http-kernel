@@ -15,6 +15,8 @@ use Symfony\Component\Routing\RouterInterface;
 use Throwable;
 use ZoiloMora\ElasticAPM\ElasticApmTracer;
 use ZoiloMora\ElasticAPM\Events\Common\Context;
+use ZoiloMora\ElasticAPM\Events\Common\Tags;
+use ZoiloMora\ElasticAPM\Events\Common\User;
 
 final class EventSubscriber implements EventSubscriberInterface
 {
@@ -55,11 +57,22 @@ final class EventSubscriber implements EventSubscriberInterface
             $event->getRequest(),
         );
 
+        $userId = $event->getRequest()->attributes->get('authenticated_uid', null);
+        $companyId = $event->getRequest()->get('companyId', null);
+        $projectId = $event->getRequest()->get('projectId', null);
+
         $this->transactions[$requestId] = $this->elasticApmTracer->startTransaction(
             $this->getNameTransaction(
                 $event->getRequest(),
             ),
             'request',
+            new Context(
+                tags: tags::from([
+                    'companyId' => $companyId,
+                    'projectId' => $projectId
+                ]),
+                user: new User($userId)
+            )
         );
     }
 
